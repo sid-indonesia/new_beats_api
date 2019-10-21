@@ -8,7 +8,12 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-data class Sessions(var uid:String, var time_start:Long)
+data class Sessions(
+    var id:Int?=null,
+    var uid:String,
+    var time_start:Long,
+    var time_finish:Long?=null
+)
 
 object SessionExecutor : BaseExecutor<Sessions,BaseResponse<Int>>{
 
@@ -18,7 +23,7 @@ object SessionExecutor : BaseExecutor<Sessions,BaseResponse<Int>>{
             SchemaUtils.create(Session)
             val session = Session.insert {
                 it[uid] = data.uid
-                it[time_start] =data.time_start
+                it[time_start] = data.time_start
             }get Session.id
             result = session
         }
@@ -28,5 +33,26 @@ object SessionExecutor : BaseExecutor<Sessions,BaseResponse<Int>>{
             "succes"
         )
         return baseResponse
+    }
+
+    fun selectAll():BaseResponse<List<Sessions>>{
+        var sessions = listOf<Sessions>()
+        transaction {
+            SchemaUtils.create(Session)
+            sessions = Session.selectAll().map {
+                Sessions(
+                    it[Session.id],
+                    it[Session.uid],
+                    it[Session.time_start],
+                    it[Session.time_finish]
+                )
+            }
+        }
+        return BaseResponse(
+            sessions,
+            200,
+            "succes"
+        )
+
     }
 }

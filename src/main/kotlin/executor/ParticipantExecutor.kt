@@ -4,7 +4,9 @@ import models.BaseResponse
 import models.Participant
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import javax.servlet.http.Part
 
 data class ParticipantData(
     val uid:String,
@@ -42,6 +44,30 @@ object ParticipantExecutor:BaseExecutor<ParticipantData, BaseResponse<Participan
 
         return BaseResponse(
             ParticipantCallBack(result),
+            200,
+            "succes"
+        )
+    }
+
+    fun selectAll():BaseResponse<List<ParticipantData>>{
+        var participants = listOf<ParticipantData>()
+        transaction {
+            SchemaUtils.create(Participant)
+            participants = Participant.selectAll().map {
+                ParticipantData(
+                    it[Participant.uid],
+                    it[Participant.name],
+                    it[Participant.email],
+                    it[Participant.gender],
+                    it[Participant.age],
+                    it[Participant.session_id],
+                    it[Participant.time_start],
+                    it[Participant.time_finish]
+                )
+            }
+        }
+        return BaseResponse(
+            participants,
             200,
             "succes"
         )

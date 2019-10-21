@@ -16,28 +16,42 @@ fun main(args: Array<String>){
     DBConfig.init()
     val mapper = jacksonObjectMapper()
     val app = Javalin.create().start(8000)
-    app.get("/"){ ctx -> ctx.result("Hello world!")}
+    app.get("/"){ ctx -> ctx.result("Beats Api Service V1")}
 
-    app.post("/session"){call ->
+//    Sessions activity here
+    app.post("/sessions"){call ->
         val data = call.bodyAsClass(Sessions::class.java)
         val response = mapper.writeValueAsString(SessionExecutor.insertData(data))
         call.result(response).contentType("application/json")
     }
 
-    app.get("/session"){
-        var res = mapOf("session" to "aji")
-        it.result(res.toString())
+    app.get("/sessions"){ call ->
+        call.result(mapper.writeValueAsString(SessionExecutor.selectAll())).contentType("application/json")
     }
 
-    app.post("/response"){call->
+//    Response Activity here
+    app.post("/responses"){call->
         val data = call.bodyAsClass(ResponseData::class.java)
         val response = mapper.writeValueAsString(ResponseExecutor.insertData(data))
         call.result(response).contentType("application/json")
     }
 
-    app.post("/participant"){call ->
+    app.get("/responses"){call ->
+        call.result(mapper.writeValueAsString(ResponseExecutor.selectAll())).contentType("application/json")
+    }
+
+    app.get("/response/?uid=uid"){
+        print(it.pathParam("uid"))
+    }
+
+//    Participants activity here
+    app.post("/participants"){call ->
         val data = call.bodyAsClass(ParticipantData::class.java)
         val response = mapper.writeValueAsString(ParticipantExecutor.insertData(data))
         call.result(response).contentType("application/json")
+    }
+
+    app.get("/participants"){call->
+        call.result(mapper.writeValueAsString(ParticipantExecutor.selectAll())).contentType("application/json")
     }
 }
