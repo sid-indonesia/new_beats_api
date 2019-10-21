@@ -3,7 +3,8 @@ package executor
 import org.jetbrains.exposed.sql.Database
 
 object DBConfig {
-    val db by lazy {
-        Database.connect("jdbc:sqlite:/data/data.db", "org.sqlite.JDBC")
+    fun init(){
+        val path = System.getProperty("user.dir")
+        Database.connect("jdbc:sqlite:${path}/data/beats.db", "org.sqlite.JDBC")
     }
 }
