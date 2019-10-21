@@ -10,23 +10,28 @@ import com.fasterxml.jackson.core.*
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import executor.SessionExecutor
-import executor.Sessions
+import executor.*
 
 fun main(args: Array<String>){
-    val path = System.getProperty("user.dir")
-    println(path)
-    Database.connect("jdbc:sqlite:${path}/data/beats.db", "org.sqlite.JDBC")
+    DBConfig.init()
+    val mapper = jacksonObjectMapper()
     val app = Javalin.create().start(8000)
     app.get("/"){ ctx -> ctx.result("Hello world!")}
 
-    app.post("/session"){ctx ->
-        val data = ctx.bodyAsClass(Sessions::class.java)
-        SessionExecutor.createSession(data)
+    app.post("/session"){call ->
+        val data = call.bodyAsClass(Sessions::class.java)
+        val response = mapper.writeValueAsString(SessionExecutor.insertData(data))
+        call.result(response)
     }
 
     app.get("/session"){
         var res = mapOf("session" to "aji")
         it.result(res.toString())
+    }
+
+    app.post("/response"){call->
+        val data = call.bodyAsClass(ResponseData::class.java)
+        val response = mapper.writeValueAsString(ResponseExecutor.insertData(data))
+        call.result(response)
     }
 }
