@@ -1,3 +1,6 @@
+import activity.participantsActivity
+import activity.responseActivity
+import activity.sessionsActivity
 import io.javalin.Javalin
 import models.Participant
 import models.Response
@@ -19,39 +22,9 @@ fun main(args: Array<String>){
     app.get("/"){ ctx -> ctx.result("Beats Api Service V1")}
 
 //    Sessions activity here
-    app.post("/sessions"){call ->
-        val data = call.bodyAsClass(Sessions::class.java)
-        val response = mapper.writeValueAsString(SessionExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.get("/sessions"){ call ->
-        call.result(mapper.writeValueAsString(SessionExecutor.selectAll())).contentType("application/json")
-    }
-
+    sessionsActivity(app)
 //    Response Activity here
-    app.post("/responses"){call->
-        val data = call.bodyAsClass(ResponseData::class.java)
-        val response = mapper.writeValueAsString(ResponseExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.get("/responses"){call ->
-        call.result(mapper.writeValueAsString(ResponseExecutor.selectAll())).contentType("application/json")
-    }
-
-    app.get("/response/?uid=uid"){
-        print(it.pathParam("uid"))
-    }
-
+    responseActivity(app)
 //    Participants activity here
-    app.post("/participants"){call ->
-        val data = call.bodyAsClass(ParticipantData::class.java)
-        val response = mapper.writeValueAsString(ParticipantExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.get("/participants"){call->
-        call.result(mapper.writeValueAsString(ParticipantExecutor.selectAll())).contentType("application/json")
-    }
+    participantsActivity(app)
 }
