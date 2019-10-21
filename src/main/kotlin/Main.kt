@@ -21,7 +21,7 @@ fun main(args: Array<String>){
     app.post("/session"){call ->
         val data = call.bodyAsClass(Sessions::class.java)
         val response = mapper.writeValueAsString(SessionExecutor.insertData(data))
-        call.result(response)
+        call.result(response).contentType("application/json")
     }
 
     app.get("/session"){
@@ -32,6 +32,12 @@ fun main(args: Array<String>){
     app.post("/response"){call->
         val data = call.bodyAsClass(ResponseData::class.java)
         val response = mapper.writeValueAsString(ResponseExecutor.insertData(data))
-        call.result(response)
+        call.result(response).contentType("application/json")
+    }
+
+    app.post("/participant"){call ->
+        val data = call.bodyAsClass(ParticipantData::class.java)
+        val response = mapper.writeValueAsString(ParticipantExecutor.insertData(data))
+        call.result(response).contentType("application/json")
     }
 }
