@@ -8,7 +8,7 @@ object Participant : Table(){
     val email = varchar("email", 35)
     val gender = varchar("gender", 3)
     val age = integer("age")
-    val session_id = integer("session_id")
+    val session_id = (varchar("session_id", 35) references Session.uid)
     val time_start = long("time_start")
     val time_finish = long("time_finish").nullable()
 }
