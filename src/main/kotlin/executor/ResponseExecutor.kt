@@ -18,13 +18,9 @@ data class ResponseData(
     val time_stamp:Long
 )
 
-data class ResponseCallBack(
-    val uid:String
-)
-
-object ResponseExecutor : BaseExecutor<ResponseData, BaseResponse<ResponseCallBack>>{
-    override fun insertData(data: ResponseData): BaseResponse<ResponseCallBack> {
-        var result:String = ""
+object ResponseExecutor : BaseExecutor<ResponseData>{
+    override fun insertData(data: ResponseData): BaseResponse<ResponseData> {
+        var responseData : ResponseData? = null
         transaction {
             SchemaUtils.create(Response)
             val response = Response.insert {
@@ -36,25 +32,68 @@ object ResponseExecutor : BaseExecutor<ResponseData, BaseResponse<ResponseCallBa
                 it[task_id] = data.task_id
                 it[time_stamp]=data.time_stamp
             }get Response.uid
-            result = response
+            responseData = select(response)
         }
         return BaseResponse(
-            ResponseCallBack(result),
-            200,
+            responseData,
+            201,
             "succes"
         )
     }
 
-    fun isAdded(uid:String){
+    override fun selectByUID(uid: String): BaseResponse<ResponseData> {
+        var response = listOf<ResponseData>()
         transaction {
             SchemaUtils.create(Response)
-            val response = Response.select{
+            response = Response.select{
                 Response.uid eq uid
+            }.limit(1).map {
+                ResponseData(
+                    it[Response.uid],
+                    it[Response.gid],
+                    it[Response.x],
+                    it[Response.y],
+                    it[Response.colour],
+                    it[Response.task_id],
+                    it[Response.time_stamp])
             }
+        }
+        if(response.isNotEmpty()){
+            return BaseResponse(
+                response.firstOrNull(),
+                200,
+                "succes"
+            )
+        }else{
+            return BaseResponse(
+                null,
+                404,
+                "Data not found"
+            )
         }
     }
 
-    fun selectAll():BaseResponse<List<ResponseData>>{
+    override fun select(uid: String): ResponseData? {
+        var responseData : ResponseData ? = null
+        transaction {
+            SchemaUtils.create(Response)
+            responseData = Response.select {
+                Response.uid eq uid
+            }.map {
+                ResponseData(
+                    it[Response.uid],
+                    it[Response.gid],
+                    it[Response.x],
+                    it[Response.y],
+                    it[Response.colour],
+                    it[Response.task_id],
+                    it[Response.time_stamp])
+            }.first()
+        }
+        return responseData
+    }
+
+    override fun selectAll(): BaseResponse<List<ResponseData>> {
         var res = listOf<ResponseData>()
         transaction {
             SchemaUtils.create(Response)
@@ -69,10 +108,18 @@ object ResponseExecutor : BaseExecutor<ResponseData, BaseResponse<ResponseCallBa
                     it[Response.time_stamp])
             }
         }
-        return BaseResponse(
-            res,
-            200,
-            "succes"
-        )
+        if(res.isNotEmpty()){
+            return BaseResponse(
+                res,
+                200,
+                "succes"
+            )
+        }else{
+            return BaseResponse(
+                null,
+                404,
+                "succes"
+            )
+        }
     }
 }

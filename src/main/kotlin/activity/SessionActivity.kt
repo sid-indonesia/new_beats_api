@@ -8,11 +8,17 @@ import io.javalin.Javalin
 fun sessionsActivity(app:Javalin){
     app.post("/sessions"){call ->
         val data = call.bodyAsClass(Sessions::class.java)
-        val response = jsonMapper(SessionExecutor.insertData(data))
-        call.result(response).contentType("application/json")
+        val response = SessionExecutor.insertData(data)
+        responseCallBack(call,response)
     }
 
     app.get("/sessions"){ call ->
-        call.result(jsonMapper(SessionExecutor.selectAll())).contentType("application/json")
+        val response = SessionExecutor.selectAll()
+        responseCallBack(call, response)
+    }
+
+    app.get("/sessions/:uid"){call ->
+        val response = SessionExecutor.selectByUID(call.pathParam(":uid"))
+        responseCallBack(call, response)
     }
 }

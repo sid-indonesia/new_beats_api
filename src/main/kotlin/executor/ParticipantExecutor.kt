@@ -2,8 +2,10 @@ package executor
 
 import models.BaseResponse
 import models.Participant
+import models.Response
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import javax.servlet.http.Part
@@ -19,37 +21,39 @@ data class ParticipantData(
     val time_finish:Long?=null
 )
 
-data class ParticipantCallBack(
-    val uid:String
-)
-
-
-object ParticipantExecutor:BaseExecutor<ParticipantData, BaseResponse<ParticipantCallBack>>{
-    override fun insertData(data: ParticipantData): BaseResponse<ParticipantCallBack> {
-        var result : String = ""
-        transaction {
-            SchemaUtils.create(Participant)
-            val participant = Participant.insert {
-                it[uid] = data.uid
-                it[name] = data.name
-                it[email] = data.email
-                it[gender] = data.gender
-                it[age] = data.age
-                it[session_id] = data.session_id
-                it[time_start] = data.time_start
-                it[time_finish] = data.time_finish
-            }get Participant.uid
-            result = participant
-        }
-
+object ParticipantExecutor:BaseExecutor<ParticipantData>{
+    override fun selectByUID(uid: String): BaseResponse<ParticipantData> {
+        val participant = select(uid)
         return BaseResponse(
-            ParticipantCallBack(result),
+            participant,
             200,
-            "succes"
+            "OK"
         )
     }
 
-    fun selectAll():BaseResponse<List<ParticipantData>>{
+    override fun select(uid: String): ParticipantData? {
+        var participantData : ParticipantData ? = null
+        transaction {
+            SchemaUtils.create(Participant)
+            participantData = Participant.select {
+                Participant.uid eq uid
+            }.map {
+                ParticipantData(
+                    it[Participant.uid],
+                    it[Participant.name],
+                    it[Participant.email],
+                    it[Participant.gender],
+                    it[Participant.age],
+                    it[Participant.session_id],
+                    it[Participant.time_start],
+                    it[Participant.time_finish]
+                )
+            }.first()
+        }
+        return participantData
+    }
+
+    override fun selectAll(): BaseResponse<List<ParticipantData>> {
         var participants = listOf<ParticipantData>()
         transaction {
             SchemaUtils.create(Participant)
@@ -66,9 +70,40 @@ object ParticipantExecutor:BaseExecutor<ParticipantData, BaseResponse<Participan
                 )
             }
         }
+        if(participants.isNotEmpty()){
+            return BaseResponse(
+                participants,
+                200,
+                "succes"
+            )
+        }else{
+            return BaseResponse(
+                null,
+                404,
+                "succes"
+            )
+        }
+    }
+
+    override fun insertData(data: ParticipantData): BaseResponse<ParticipantData> {
+        var result : ParticipantData?=null
+        transaction {
+            SchemaUtils.create(Participant)
+            val participant = Participant.insert {
+                it[uid] = data.uid
+                it[name] = data.name
+                it[email] = data.email
+                it[gender] = data.gender
+                it[age] = data.age
+                it[session_id] = data.session_id
+                it[time_start] = data.time_start
+                it[time_finish] = data.time_finish
+            } get Response.uid
+            result = select(participant)
+        }
         return BaseResponse(
-            participants,
-            200,
+            result,
+            201,
             "succes"
         )
     }

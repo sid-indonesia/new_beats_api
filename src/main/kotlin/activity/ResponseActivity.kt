@@ -7,15 +7,18 @@ import io.javalin.Javalin
 fun responseActivity(app: Javalin){
     app.post("/responses"){call->
         val data = call.bodyAsClass(ResponseData::class.java)
-        val response = jsonMapper(ResponseExecutor.insertData(data))
-        call.result(response).contentType("application/json")
+        val response = ResponseExecutor.insertData(data)
+        responseCallBack(call, response)
     }
 
     app.get("/responses"){call ->
-        call.result(jsonMapper(ResponseExecutor.selectAll())).contentType("application/json")
+        val response = ResponseExecutor.selectAll()
+        responseCallBack(call, response)
     }
 
-    app.get("/response/?uid=uid"){
-        print(it.pathParam("uid"))
+    app.get("/responses/:uid"){call ->
+        print(call.pathParam(":uid"))
+        val response = ResponseExecutor.selectByUID(call.pathParam(":uid"))
+        responseCallBack(call, response)
     }
 }
