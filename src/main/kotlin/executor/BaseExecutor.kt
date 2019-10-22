@@ -7,4 +7,6 @@ interface BaseExecutor<T> {
     fun selectByUID(uid:String):BaseResponse<T>
     fun selectAll():BaseResponse<List<T>>
     fun select(uid:String):T?
+    fun updateData(data:T):BaseResponse<T>
+    fun deleteData(uid:String)
 }

@@ -2,10 +2,7 @@ package executor
 
 import models.BaseResponse
 import models.Response
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 data class ResponseData(
@@ -120,6 +117,36 @@ object ResponseExecutor : BaseExecutor<ResponseData>{
                 404,
                 "succes"
             )
+        }
+    }
+
+    override fun updateData(data: ResponseData): BaseResponse<ResponseData> {
+        var responseData : ResponseData? = null
+        transaction {
+            SchemaUtils.create(Response)
+            Response.update({
+                Response.uid eq data.uid
+            }) {
+                it[gid]=data.gid
+                it[x]=data.x
+                it[y]=data.y
+                it[colour]=data.colour
+                it[task_id] = data.task_id
+                it[time_stamp]=data.time_stamp
+            }
+            responseData = select(data.uid)
+        }
+        return BaseResponse(
+            responseData,
+            201,
+            "succes"
+        )
+    }
+
+    override fun deleteData(uid: String) {
+        transaction {
+            SchemaUtils.create(Response)
+            Response.deleteWhere{Response.uid eq uid}
         }
     }
 }

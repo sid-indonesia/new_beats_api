@@ -21,4 +21,15 @@ fun responseActivity(app: Javalin){
         val response = ResponseExecutor.selectByUID(call.pathParam(":uid"))
         responseCallBack(call, response)
     }
+
+    app.put("/responses/:uid"){call->
+        val data = call.bodyAsClass(ResponseData::class.java)
+        val response = ResponseExecutor.updateData(data)
+        responseCallBack(call, response)
+    }
+
+    app.delete("/responses/:uid"){call->
+        ResponseExecutor.deleteData(call.pathParam(":uid"))
+        call.status(204)
+    }
 }

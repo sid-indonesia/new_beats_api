@@ -3,10 +3,7 @@ package executor
 import models.BaseResponse
 import models.Participant
 import models.Response
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import javax.servlet.http.Part
 
@@ -98,7 +95,7 @@ object ParticipantExecutor:BaseExecutor<ParticipantData>{
                 it[session_id] = data.session_id
                 it[time_start] = data.time_start
                 it[time_finish] = data.time_finish
-            } get Response.uid
+            } get Participant.uid
             result = select(participant)
         }
         return BaseResponse(
@@ -107,4 +104,36 @@ object ParticipantExecutor:BaseExecutor<ParticipantData>{
             "succes"
         )
     }
+
+    override fun updateData(data: ParticipantData): BaseResponse<ParticipantData> {
+        var result : ParticipantData?=null
+        transaction {
+            SchemaUtils.create(Participant)
+            val participant = Participant.update({
+                Participant.uid eq data.uid
+            }) {
+                it[name] = data.name
+                it[email] = data.email
+                it[gender] = data.gender
+                it[age] = data.age
+                it[session_id] = data.session_id
+                it[time_start] = data.time_start
+                it[time_finish] = data.time_finish
+            }
+            result = select(data.uid)
+        }
+        return BaseResponse(
+            result,
+            201,
+            "succes"
+        )
+    }
+
+    override fun deleteData(uid: String){
+        transaction {
+            SchemaUtils.create(Participant)
+            Participant.deleteWhere { Participant.uid eq uid }
+        }
+    }
+
 }

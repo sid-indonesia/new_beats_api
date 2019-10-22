@@ -76,4 +76,30 @@ object SessionExecutor : BaseExecutor<Sessions>{
        }
         return sessions
     }
+
+    override fun updateData(data: Sessions): BaseResponse<Sessions> {
+        var sessions : Sessions ? = null
+        transaction {
+            SchemaUtils.create(Session)
+            val session = Session.update({
+                Session.uid eq data.uid
+            }) {
+                it[time_start] = data.time_start
+                it[time_finish] = data.time_finish
+            }
+            sessions = select(data.uid)
+        }
+        return BaseResponse(
+            sessions,
+            201,
+            "succes"
+        )
+    }
+
+    override fun deleteData(uid: String) {
+        transaction {
+            SchemaUtils.create(Session)
+            Session.deleteWhere { Session.uid eq uid }
+        }
+    }
 }
