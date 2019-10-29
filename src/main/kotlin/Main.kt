@@ -1,3 +1,7 @@
+import activity.GroupActivity
+import activity.participantsActivity
+import activity.responseActivity
+import activity.sessionsActivity
 import io.javalin.Javalin
 import models.Participant
 import models.Response
@@ -11,40 +15,19 @@ import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import executor.*
-import models.Group
 
-fun main(args: Array<String>) {
+fun main(args: Array<String>){
     DBConfig.init()
     val mapper = jacksonObjectMapper()
     val app = Javalin.create().start(8000)
-    app.get("/") { ctx -> ctx.result("Hello world!") }
+    app.get("/"){ ctx -> ctx.result("Beats Api Service V1")}
 
-    app.post("/session") { call ->
-        val data = call.bodyAsClass(Sessions::class.java)
-        val response = mapper.writeValueAsString(SessionExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.get("/session") {
-        var res = mapOf("session" to "aji")
-        it.result(res.toString())
-    }
-
-    app.post("/response") { call ->
-        val data = call.bodyAsClass(ResponseData::class.java)
-        val response = mapper.writeValueAsString(ResponseExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.post("/participant") { call ->
-        val data = call.bodyAsClass(ParticipantData::class.java)
-        val response = mapper.writeValueAsString(ParticipantExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
-
-    app.post("/group") { call ->
-        val data = call.bodyAsClass(GroupData::class.java)
-        val response = mapper.writeValueAsString(GroupExecutor.insertData(data))
-        call.result(response).contentType("application/json")
-    }
+//    Sessions activity here
+    sessionsActivity(app)
+//    Response Activity here
+    responseActivity(app)
+//    Participants activity here
+    participantsActivity(app)
+//    Groups activity here
+    GroupActivity(app)
 }

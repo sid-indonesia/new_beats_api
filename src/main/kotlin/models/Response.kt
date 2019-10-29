@@ -3,8 +3,9 @@ package models
 import org.jetbrains.exposed.sql.Table
 
 object Response : Table(){
-    val uid = varchar("uid", 35).primaryKey()
-    val gid = varchar("gid", 35).nullable()
+    val id = integer("id").autoIncrement().primaryKey()
+    val uid = (varchar("uid", 35) references Participant.uid)
+    val gid = (varchar("gid", 35) references Group.gid).nullable()
     val x = integer("x")
     val y = integer("y")
     val colour = varchar("colour", 10)
